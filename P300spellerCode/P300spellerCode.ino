@@ -1,9 +1,9 @@
 int xAccelPin = A0;
 int yAccelPin = A1;
 
-const int ARRAY_SIZE = 10;
+const int ARRAY_SIZE = 30;
 const int COLS = 6;
-double THRESH = 0.05;
+double THRESH = 0.03;
 
 double magVals[ARRAY_SIZE];
 double magAvg = 0.0;
@@ -15,6 +15,7 @@ String message = "Message: ";
 
 bool CAPS = true;
 bool AVGD = false;
+bool post1sec = false;
 
 int counter = 0; // keep track of how many magnitude samples have been recorded
 int vector = 0; // use for cycling through highlighted column or row; 6 columns, 7 rows
@@ -40,7 +41,8 @@ void setup() {
 }
 
 void loop(){
-  if (magAvg != 0 && (millis()-millisNow) > 1000){ //highlight next column or row only after 1 sec
+  if (magAvg != 0 && post1sec){ //highlight next column or row only after 1 sec
+    post1sec = false;
     Serial.println(message);
     Serial.println();
     millisNow = millis();
@@ -125,7 +127,29 @@ void loop(){
     Serial.print(row);
     Serial.print(" Col = ");
     Serial.println(col);
-    delay(500);
+    delay(1000);
+  }
+  else //no eyebrow movement
+  {
+    if((millis()-millisNow) > 1000) //highlight next column or row only after 1 sec
+    {
+      post1sec = true;
+      if(vector == 5) //reached last column
+      {
+        //cycle through columns again
+        vector = 0;
+      }
+      else if(vector == 12)
+      {
+        //cycle through rows again
+        vector = 6;
+      }
+      else
+      {
+        //advance to next column or row
+        vector++;
+      }
+    }
   }
   
   counter++;
@@ -149,37 +173,33 @@ void loop(){
     counter = 0;
   }
   
-  else //no eyebrow movement
-  {
-    if((millis()-millisNow) > 1000) //highlight next column or row only after 1 sec
-    {
-      if(vector == 5) //reached last column
-      {
-        //cycle through columns again
-        vector = 0;
-      }
-      else if(vector == 12)
-      {
-        //cycle through rows again
-        vector = 6;
-      }
-      else
-      {
-        //advance to next column or row
-        vector++;
-      }
-    }
-  }
   
   // if a column and row number were selected
   if (row!=-1 && col!=-1){
-    if (CAPS){
-      //message.concat(capChars[col][row]);
-      message += capChars[row][col];
+    if (lowChars[row][col] == '_'){ //add space
+      message += ' ';
     }
-    else {
-      //message.concat(lowChars[col][row]);
+    else if(lowChars[row][col] == '<'){ //delete last character
+      message.remove(message.length() - 1);
+    }
+    else if(lowChars[row][col] == '^'){ //set next character as upperCase
+      CAPS = true;
+      //do not print this character, wait until next character is selected, and print it as upperCase
+    }
+    else if(lowChars[row][col] == '.' || lowChars[row][col] == '?' || lowChars[row][col] == '!'){ //add punctuation
       message += lowChars[row][col];
+      CAPS = true; // first letter of next sentence will be capital
+    }
+    else{ //print the letter or number
+      if (CAPS){
+        //message.concat(capChars[col][row]);
+        message += capChars[row][col];
+        CAPS = false;
+      }
+      else {
+        //message.concat(lowChars[col][row]);
+        message += lowChars[row][col];
+      }
     }
     //reset col and row
     col = -1;
