@@ -1,9 +1,14 @@
 int xAccelPin = A0;
 int yAccelPin = A1;
 
+<<<<<<< HEAD
 const int ARRAY_SIZE = 60;
 const int COLS = 6;
 const int DELAY = 1500;
+=======
+const int ARRAY_SIZE = 30;
+const int COLS = 6;
+>>>>>>> origin/master
 double THRESH = 0.03;
 
 double magVals[ARRAY_SIZE];
@@ -138,11 +143,19 @@ void loop(){
     Serial.print(row);
     Serial.print(" Col = ");
     Serial.println(col);
+<<<<<<< HEAD
     delay(DELAY);
   }
   else //no eyebrow movement
   {
     if(AVGD && (millis()-millisNow) > DELAY) //highlight next column or row only after specified amount of time sec
+=======
+    delay(1000);
+  }
+  else //no eyebrow movement
+  {
+    if((millis()-millisNow) > 1000) //highlight next column or row only after 1 sec
+>>>>>>> origin/master
     {
       post1sec = true;
       if(vector == 5) //reached last column
@@ -189,6 +202,7 @@ void loop(){
   if (row!=-1 && col!=-1){
     if (lowChars[row][col] == '_'){ //add space
       message += ' ';
+<<<<<<< HEAD
     }
     else if(lowChars[row][col] == '<'){ //delete last character
       message.remove(message.length() - 1);
@@ -197,6 +211,16 @@ void loop(){
       CAPS = true;
       //do not print this character, wait until next character is selected, and print it as upperCase
     }
+=======
+    }
+    else if(lowChars[row][col] == '<'){ //delete last character
+      message.remove(message.length() - 1);
+    }
+    else if(lowChars[row][col] == '^'){ //set next character as upperCase
+      CAPS = true;
+      //do not print this character, wait until next character is selected, and print it as upperCase
+    }
+>>>>>>> origin/master
     else if(lowChars[row][col] == '.' || lowChars[row][col] == '?' || lowChars[row][col] == '!'){ //add punctuation
       message += lowChars[row][col];
       CAPS = true; // first letter of next sentence will be capital
